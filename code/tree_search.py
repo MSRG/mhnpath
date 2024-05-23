@@ -6,6 +6,7 @@ from price import calculate_cost
 from reaction_cond import pred_temperature, pred_solvent_score
 from predict import predict
 import csv
+from type_disconnect import find_type_disconnect
 
 
 class Node:
@@ -24,15 +25,15 @@ class Edge:
         self.rule = rule
         self.label = label
 
-def find_pathways(input_smiles, n_enz=3, n_syn=3, max_depth=3):
+def find_pathways(input_smiles, n_enz=3, n_syn=3, max_depth=3, X=None, Y=None, num=None):
     price = get_price(input_smiles)
     if price is None:
         price = 500
     start_node = Node(input_smiles, price, 0)
-    dfs_search(start_node, n_enz, n_syn, max_depth)
+    dfs_search(start_node, n_enz, n_syn, max_depth, X, Y, num)
     print_tree(start_node)
 
-def dfs_search(node, n_enz, n_syn, max_depth):
+def dfs_search(node, n_enz, n_syn, max_depth, X, Y, num):
     if node.cost_usd_per_g <= 100 or node.depth >= max_depth:
         return
 
@@ -58,7 +59,8 @@ def dfs_search(node, n_enz, n_syn, max_depth):
             cost_usd_per_g = get_price(reactant)
             if cost_usd_per_g is None:
                 cost_usd_per_g = 500
-            score = - (temperature/300) - (cost_usd_per_g/500) + solvent_score
+            type_dis = get_type_disconnect(X, Y, num, node.smiles, reactant)
+            score = - (temperature/300) - (cost_usd_per_g/500) + solvent_score + type_dis
             new_edge.score = score
             new_node = Node(reactant, cost_usd_per_g, node.depth + 1)
             node.subtrees.append((new_edge, new_node))
@@ -84,7 +86,8 @@ def dfs_search(node, n_enz, n_syn, max_depth):
             cost_usd_per_g = get_price(reactant)
             if cost_usd_per_g is None:
                 cost_usd_per_g = 500
-            score = - (temperature/300) - (cost_usd_per_g/500) + solvent_score
+            type_dis = get_type_disconnect(X, Y, num, node.smiles, reactant)
+            score = - (temperature/300) - (cost_usd_per_g/500) + solvent_score + type_dis
             new_edge.score = score
             new_node = Node(reactant, cost_usd_per_g, node.depth + 1)
             node.subtrees.append((new_edge, new_node))
@@ -130,26 +133,19 @@ def get_price(smiles):
     c = calculate_cost([smiles])
     return min(c)
 
+def get_type_disconnect(X, Y, num, product, reactant):
+    type_dis = find_type_disconnect(X, Y, num, product, reactant)
+    if type_dis is None:
+        return 0
+    return type_dis
+
+
 def print_tree(node, filename='tree.txt', level=0):
     with open(filename, 'a') as file:
         file.write('  ' * level + str(node.__dict__) + '\n')
         for edge, subtree in node.subtrees:
             file.write('  ' * (level + 1) + str(edge.__dict__) + '\n')
             print_tree(subtree, filename, level + 1)
-
-def find_type_disconnect(smiles):
-    m = Chem.MolFromSmiles(smiles)
-    patt5 = Chem.MolFromSmarts('c1ccccc1OCC')
-    patt3 = Chem.MolFromSmarts('c1ccccc1O')
-    patt4 = Chem.MolFromSmarts('c1ccccc1OC')
-    if m.HasSubstructMatch(patt5):
-        return 5
-    elif m.HasSubstructMatch(patt3):
-        return 3
-    elif m.HasSubstructMatch(patt4):
-        return 4
-    else:
-        return 0
 
 
 # print(apply_rule('[C:5]-[C;H0;D3;+0:4](-[C;D1;H3:6])=[O;H0;D1;+0:7].[C:1]-[C;H0;D3;+0:2](=[O;D1;H0:3])-[O;H1;D1;+0]>>[C:1]-[C;H0;D3;+0:2](=[O;D1;H0:3])-[C;H0;D4;+0:4](-[C:5])(-[C;D1;H3:6])-[OH;D1;+0:7]', 'C=C(C)C(CCC(C)=O)CC(=O)O'))
