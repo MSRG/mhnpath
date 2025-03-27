@@ -1,13 +1,12 @@
-from rdkit import Chem
-from rdkit.Chem import AllChem
-from price import calculate_cost
-from reaction_cond import pred_temperature, pred_solvent_score
-from predict import predict
 import csv
-from mhnreact.inspector import *
-import os
 import json
 import heapq
+from rdkit import Chem
+from predict import predict
+from rdkit.Chem import AllChem
+from mhnreact.inspector import *
+from price import calculate_cost
+from reaction_cond import pred_temperature, pred_solvent_score
 
 
 class Node:
@@ -189,6 +188,47 @@ def print_tree_to_json(node, filename='tree.json', level=0):
     else:
         return tree_dict
                         
-find_pathways('Oc(ccc(CC1NCCc(cc2O)c1cc2O)c1)c1O', n_enz=5, n_syn=5, max_depth=5, json_pathway='tree_1.json', device='cpu')
+# Example usage   
+# find_pathways('Oc(ccc(CC1NCCc(cc2O)c1cc2O)c1)c1O', n_enz=5, n_syn=5, max_depth=5, json_pathway='tree.json', device='cpu')
 
-#device can be 'cuda' or 'cpu'
+# -------------------------
+# Command-Line Interface
+# -------------------------
+#
+# This script can also be executed from the command line.
+#
+# Usage example:
+#
+#   python tree_search_global_greedy.py -product "Oc(ccc(CC1NCCc(cc2O)c1cc2O)c1)c1O" -n_enz 5 -n_syn 5 -max_depth 5 -json_pathway "tree.json" -device "cpu"
+#
+# Parameters:
+#   -product      : SMILES string of the target product. (Required)
+#   -n_enz        : Number of enzyme reaction rules to consider. (Optional, default: 3)
+#   -n_syn        : Number of synthetic reaction rules to consider. (Optional, default: 3)
+#   -max_depth    : Maximum depth for the tree search. (Optional, default: 3)
+#   -json_pathway : Filename to which the resulting pathway tree will be saved in JSON format. (Optional, default: "tree.json")
+#   -device       : Device to run the model on; either "cpu" or "cuda". (Optional, default: "cpu")
+
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Tree Search for Pathways: Generate pathways by applying enzyme and synthetic reaction rules."
+    )
+    parser.add_argument("-product", type=str, required=True,
+                        help="SMILES string of the target product (e.g., 'Oc(ccc(CC1NCCc(cc2O)c1cc2O)c1)c1O').")
+    parser.add_argument("-n_enz", type=int, default=3,
+                        help="Number of enzyme reaction rules to consider (default: 3).")
+    parser.add_argument("-n_syn", type=int, default=3,
+                        help="Number of synthetic reaction rules to consider (default: 3).")
+    parser.add_argument("-max_depth", type=int, default=3,
+                        help="Maximum search depth for pathway exploration (default: 3).")
+    parser.add_argument("-json_pathway", type=str, default="tree.json",
+                        help="Filename for the output JSON file (default: 'tree.json').")
+    parser.add_argument("-device", type=str, default="cpu",
+                        help="Device to run the model on: 'cpu' or 'cuda' (default: 'cpu').")
+
+    args = parser.parse_args()
+
+    find_pathways(args.product, n_enz=args.n_enz, n_syn=args.n_syn,
+                  max_depth=args.max_depth, json_pathway=args.json_pathway, device=args.device)
