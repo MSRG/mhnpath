@@ -435,28 +435,3 @@ def get_solvent_reagent(rxn):
         return items[0][1], items[0][2]
     except:
         return None, None
-
-# if __name__ == '__main__':
-#     cont = NeuralNetContextRecommender()
-
-#     cont.load_nn_model(model_path="NeuralNet_Cont_Model/model.json", 
-#         info_path="NeuralNet_Cont_Model/", 
-#         weights_path="NeuralNet_Cont_Model/weights.h5")
-#     print(cont.get_n_conditions('CC1(C)OBOC1(C)C.Cc1ccc(Br)cc1>>Cc1cccc(B2OC(C)(C)C(C)(C)O2)c1', 1, with_smiles=False, return_scores=False))
-#     # print(cont.name_to_category('c1','Reaxys Name palladium on activated charcoal'))
-
-# sol = pred_solvent_score('CC1(C)OBOC1(C)C.Cc1ccc(Br)cc1>>Cc1cccc(B2OC(C)(C)C(C)(C)O2)c1')
-# temp = pred_temperature('CC1(C)OBOC1(C)C.Cc1ccc(Br)cc1>>Cc1cccc(B2OC(C)(C)C(C)(C)O2)c1')
-# print(temp)
-# print(sol)
-
-# solvent, reagent = get_solvent_reagent('CC1(C)OBOC1(C)C.Cc1ccc(Br)cc1>>Cc1cccc(B2OC(C)(C)C(C)(C)O2)c1')
-# print(solvent, reagent)
-
-smiles = 'CC(C)(C)OC(=O)[N:6]1[CH2:5][CH:4]([C:2](=[O:1])[OH:3])[N:9]([CH2:10][c:11]2[cH:12][c:13](-[c:14]3[n:15][c:16]([Cl:17])[n:18][cH:19][cH:20]3)[cH:21][cH:22][cH:23]2)[CH2:8][CH2:7]1>>[O:1]=[C:2]([OH:3])[CH:4]1[CH2:5][NH:6][CH2:7][CH2:8][N:9]1[CH2:10][c:11]1[cH:12][c:13](-[c:14]2[n:15][c:16]([Cl:17])[n:18][cH:19][cH:20]2)[cH:21][cH:22][cH:23]1'
-temp = pred_temperature(smiles)
-solvent, reagent = get_solvent_reagent(smiles)
-
-print('Temperature: ', temp)
-print('Solvent: ', solvent)
-print('Reagent: ', reagent)

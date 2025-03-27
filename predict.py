@@ -93,37 +93,3 @@ def predict(smiles, n_enz, n_syn, clf_enz, clf_syn1, clf_syn2, clf_syn3, clf_syn
     sorted_syn_rules = sorted(syn_rules, key=syn_rules.get, reverse=True)
 
     return enz_rules, sorted_syn_rules[:n_syn], top_n_enz
-
-# enz = 'C=C(C)C(CCC(C)=O)CC(=O)O'
-# syn = '[CH3:1][O:2][C:3]1[CH:4]=[C:5]2[C:9](=[CH:10][C:11]=1[O:12][CH3:13])[C:8](=[O:14])[CH:21]([C:18]1[CH:17]=[CH:16][N:15]=[CH:20][CH:19]=1)[C:6]2=[CH2:7]'
-
-# clf_enz = load_clf('enz_final.pt', model_type='mhn', device='cpu')
-
-# # print(clf_enz.forward_smiles([enz]).tolist())
-
-# preds_enz = np.array(clf_enz.forward_smiles([enz]).tolist()[0])
-# top_n_enz = np.flip(np.argsort(preds_enz))[:10]
-
-# print(len(preds_enz))
-# print(max(preds_enz))
-# print(preds_enz[top_n_enz[0]])
-# print(top_n_enz)
-
-# print(preds_enz)
-# print(np.argsort(preds_enz))
-
-# top_n_enz = np.flip(np.argsort(preds_enz))[:n_enz]
-
-
-
-
-# r1, r2, g1 = predict(enz)
-# print(len(r1))
-# print(len(r2))
-# print(r1)
-# print(r2)
-# print(g1)
-
-# r1, r2 = predict(syn)
-# print(len(r1))
-# print(len(r2))
