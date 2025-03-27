@@ -5,7 +5,6 @@ from reaction_cond import pred_temperature, pred_solvent_score
 from predict import predict
 import csv
 from mhnreact.inspector import *
-import os
 import json
 
 
