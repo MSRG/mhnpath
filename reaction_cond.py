@@ -405,7 +405,7 @@ def pred_temperature(rxn):
         temp += items[i][0]*scores[i]/total
     return temp
 
-def pred_solvent_score(rxn, solvent_path='/Users/shivesh/Downloads/enzyme/toxicity.csv'):
+def pred_solvent_score(rxn, solvent_path='toxicity.csv'):
     cont = NeuralNetContextRecommender()
     cont.load_nn_model(model_path="NeuralNet_Cont_Model/model.json", 
         info_path="NeuralNet_Cont_Model/", 
