@@ -5,6 +5,8 @@ Author: Philipp Seidl
         Johannes Kepler University Linz
 Contact: seidl@ml.jku.at
 
+Modified by: Shivesh Prakash (shivesh.prakash@mail.utoronto.ca)
+
 Model related functionality
 """
 from .utils import top_k_accuracy
