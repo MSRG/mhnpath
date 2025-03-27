@@ -1,13 +1,14 @@
-import numpy as np
-import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from price import calculate_cost
 from reaction_cond import pred_temperature, pred_solvent_score
 from predict import predict
 import csv
-from type_disconnect import find_type_disconnect
+from mhnreact.inspector import *
+import os
+import json
 import heapq
+
 
 class Node:
     def __init__(self, smiles, cost_usd_per_g, depth):
@@ -21,31 +22,43 @@ class Edge:
         self.reaction_smiles = reaction_smiles
         self.temperature = temperature
         self.enzyme = enzyme
-        self.score = 0
+        self.score = score
         self.rule = rule
         self.label = label
 
-def find_pathways(input_smiles, n_enz=3, n_syn=3, max_depth=3, X=None, Y=None, num=None):
+def find_pathways(input_smiles, n_enz=3, n_syn=3, max_depth=3, json_pathway='tree_1.json', device='cpu'):
+    # Load the models
+    clf_enz = load_clf('enz_final.pt', model_type='mhn', device=device)
+    clf_syn1 = load_clf('syn1_final.pt', model_type='mhn', device=device)
+    clf_syn2 = load_clf('syn2_final.pt', model_type='mhn', device=device)
+    clf_syn3 = load_clf('syn3_final.pt', model_type='mhn', device=device)
+    clf_syn4 = load_clf('syn4_final.pt', model_type='mhn', device=device)
+    clf_syn5 = load_clf('syn5_final.pt', model_type='mhn', device=device)
+    print('getting price')
     price = get_price(input_smiles)
+    print('got price: ', price)
     if price is None:
-        price = 500
+        price = 50000
     start_node = Node(input_smiles, price, 0)
-    global_greedy_search(start_node, n_enz, n_syn, max_depth, X, Y, num)
-    print_tree(start_node)
+    global_greedy_search(start_node, n_enz, n_syn, max_depth, clf_enz, clf_syn1, clf_syn2, clf_syn3, clf_syn4, clf_syn5, start_node, json_pathway)
+    print_tree_to_json(start_node, json_pathway)
 
-def global_greedy_search(start_node, n_enz, n_syn, max_depth, X, Y, num):
+def global_greedy_search(node, n_enz, n_syn, max_depth, clf_enz, clf_syn1, clf_syn2, clf_syn3, clf_syn4, clf_syn5, start_node, json_pathway):
     pq = []
     heapq.heappush(pq, (-float('inf'), start_node))  # Start node with arbitrarily high score
 
     while pq:
+        print_tree_to_json(start_node, json_pathway)
         _, node = heapq.heappop(pq)
-        if node.cost_usd_per_g <= 100 or node.depth >= max_depth:
-            continue
 
-        enz_rules, syn_rules, enz_labels, syn_labels = find_applicable_rules(node.smiles, n_enz, n_syn)
+        if node.cost_usd_per_g <= 100 or node.depth >= max_depth:
+            return
+
+        enz_rules, syn_rules, enz_labels = find_applicable_rules(node.smiles, n_enz, n_syn, clf_enz, clf_syn1, clf_syn2, clf_syn3, clf_syn4, clf_syn5)
         for i in range(len(enz_rules)):
             rule = enz_rules[i]
             label = enz_labels[i]
+            # label = 0
             reaction_smiles = apply_rule(rule, node.smiles)
             if reaction_smiles == 0:
                 continue
@@ -59,21 +72,22 @@ def global_greedy_search(start_node, n_enz, n_syn, max_depth, X, Y, num):
                 solvent_score = 0
             new_smiles = get_reactant_smiles(reaction_smiles)
 
-            new_edge = Edge(reaction_smiles, temperature, 0, 1, rule, label)
+            if start_node.smiles in new_smiles:
+                continue
+
+            new_edge = Edge(reaction_smiles, temperature, -1000, 1, rule, label, 0)
             for reactant in new_smiles:
                 cost_usd_per_g = get_price(reactant)
                 if cost_usd_per_g is None:
-                    cost_usd_per_g = 500
-                type_dis = get_type_disconnect(X, Y, num, node.smiles, reactant)
-                score = - min(temperature/300, 1) - min(cost_usd_per_g/500, 1) + solvent_score + type_dis
-                new_edge.score = score
+                    cost_usd_per_g = 50000
+                score = - (temperature/300) - (cost_usd_per_g/500) + solvent_score
+                new_edge.score = max(score, new_edge.score)
                 new_node = Node(reactant, cost_usd_per_g, node.depth + 1)
                 node.subtrees.append((new_edge, new_node))
                 heapq.heappush(pq, (-score, new_node))
 
         for i in range(len(syn_rules)):
             rule = syn_rules[i]
-            label = syn_labels[i]
             reaction_smiles = apply_rule(rule, node.smiles)
             if reaction_smiles == 0:
                 continue
@@ -87,22 +101,24 @@ def global_greedy_search(start_node, n_enz, n_syn, max_depth, X, Y, num):
                 solvent_score = 0
             new_smiles = get_reactant_smiles(reaction_smiles)
 
-            new_edge = Edge(reaction_smiles, temperature, 0, 0, rule, label)
+            if start_node.smiles in new_smiles:
+                continue
+
+            new_edge = Edge(reaction_smiles, temperature, -1000, 0, rule, 0, 0)
             for reactant in new_smiles:
                 cost_usd_per_g = get_price(reactant)
                 if cost_usd_per_g is None:
-                    cost_usd_per_g = 500
-                type_dis = get_type_disconnect(X, Y, num, node.smiles, reactant)
-                score = - min(temperature/300, 1) - min(cost_usd_per_g/500, 1) + solvent_score + type_dis
-                new_edge.score = score
+                    cost_usd_per_g = 50000
+                score = - (temperature/300) - (cost_usd_per_g/500) + solvent_score
+                new_edge.score = max(score, new_edge.score)
                 new_node = Node(reactant, cost_usd_per_g, node.depth + 1)
                 node.subtrees.append((new_edge, new_node))
                 heapq.heappush(pq, (-score, new_node))
 
-def find_applicable_rules(smiles, n_enz, n_syn):
-    enz_rules, syn_rules, enz_labels, syn_labels = predict([smiles], n_enz, n_syn)
-    print(smiles + ' : NUMBER of rules : ' + str(len(enz_rules)) + '----' + str(len(syn_rules)))
-    return enz_rules, syn_rules, enz_labels, syn_labels
+def find_applicable_rules(smiles, n_enz, n_syn, clf_enz, clf_syn1, clf_syn2, clf_syn3, clf_syn4, clf_syn5):
+    enz_rules, syn_rules, enz_labels = predict([smiles], n_enz, n_syn, clf_enz, clf_syn1, clf_syn2, clf_syn3, clf_syn4, clf_syn5)
+    print(smiles+ ' : NUMBER of rules : ' + str(len(enz_rules)) + '----' + str(len(syn_rules)))
+    return enz_rules, syn_rules, enz_labels
 
 def apply_rule(rule, product):
     rule = '(' + rule.replace('>>', ')>>')
@@ -124,8 +140,19 @@ def get_reactant_smiles(reaction_smiles):
     reactant_part = smiles_parts[0].strip()
     reactant_parts = reactant_part.split('.')
     return reactant_parts
-
+    
 def get_price(smiles):
+    try: 
+        csv_file = 'buyables.csv'
+        compound_smiles = Chem.MolToSmiles(Chem.MolFromSmiles(smiles))
+        with open(csv_file, 'r') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                row_smiles = Chem.MolToSmiles(Chem.MolFromSmiles(row['smiles']))
+                if row_smiles == compound_smiles:
+                    return float(row['ppg'])
+    except:
+        pass
     csv_file = 'buyables.csv'
     with open(csv_file, 'r') as csvfile:
         reader = csv.DictReader(csvfile)
@@ -135,18 +162,33 @@ def get_price(smiles):
     c = calculate_cost([smiles])
     return min(c)
 
-def get_type_disconnect(X, Y, num, product, reactant):
-    type_dis = find_type_disconnect(X, Y, num, product, reactant)
-    if type_dis is None:
-        return 0
-    return type_dis
+def print_tree_to_json(node, filename='tree.json', level=0):
+    tree_dict = {
+        'smiles': node.smiles,
+        'cost_usd_per_g': node.cost_usd_per_g,
+        'depth': node.depth,
+        'subtrees': []
+    }
+    
+    for edge, subtree in node.subtrees:
+        edge_dict = {
+            'reaction_smiles': edge.reaction_smiles,
+            'temperature': edge.temperature,
+            'enzyme': edge.enzyme,
+            'score': edge.score,
+            'rule': edge.rule,
+            'label': edge.label
+        }
+        subtree_dict = print_tree_to_json(subtree, filename, level + 1)
+        edge_dict['subtree'] = subtree_dict
+        tree_dict['subtrees'].append(edge_dict)
+    
+    if level == 0:
+        with open(filename, 'w') as file:
+            json.dump(tree_dict, file, indent=2)
+    else:
+        return tree_dict
+                        
+find_pathways('Oc(ccc(CC1NCCc(cc2O)c1cc2O)c1)c1O', n_enz=5, n_syn=5, max_depth=5, json_pathway='tree_1.json', device='cpu')
 
-def print_tree(node, filename='tree_n1_1.txt', level=0):
-    with open(filename, 'a') as file:
-        file.write('  ' * level + str(node.__dict__) + '\n')
-        for edge, subtree in node.subtrees:
-            file.write('  ' * (level + 1) + str(edge.__dict__) + '\n')
-            print_tree(subtree, filename, level + 1)
-
-# Example usage
-find_pathways('CC(C)(C)[C@@H](CS(C)(=O)=O)Nc1nc(-c2c[nH]c3ncc(F)cc23)ncc1F')
+#device can be 'cuda' or 'cpu'
