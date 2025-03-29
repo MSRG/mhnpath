@@ -8,7 +8,7 @@ zip_file = "28673540.zip"
 # Define target directories
 csv_dir = "data/"
 pickle_h5_dir = "NeuralNet_Cont_Model/"
-other_files_dir = "data/models/"
+other_files_dir = "data/model/"
 
 # Ensure all target directories exist
 os.makedirs(csv_dir, exist_ok=True)
