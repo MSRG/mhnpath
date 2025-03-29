@@ -35,6 +35,7 @@ We introduce MHNpath, a machine learning-driven retrosynthetic tool designed for
    conda activate mhnpath
    pip install -r requirements.txt
    ```
+   To use the pricing feature, obtain your API keys from one or all of Mcule, Molport, and Chemspace, and add them to the `config.yaml` file. We highly recommend doing this for the best and most accurate results.
 
 2. **Download Data and Models**
 
