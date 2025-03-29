@@ -724,9 +724,9 @@ if __name__ == '__main__':
     
     if args.ssretroeval:
         print('testing on the real test set ;)')
-        from .data import load_templates
-        from .retroeval import run_templates, topkaccuracy
-        from .utils import sort_by_template_and_flatten
+        from data import load_templates
+        from retroeval import run_templates, topkaccuracy
+        from utils import sort_by_template_and_flatten
         
 
         a = list(template_list.keys())

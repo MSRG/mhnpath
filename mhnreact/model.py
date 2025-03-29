@@ -9,9 +9,9 @@ Modified by: Shivesh Prakash (shivesh.prakash@mail.utoronto.ca)
 
 Model related functionality
 """
-from .utils import top_k_accuracy
-from .plotutils import plot_loss, plot_topk, plot_nte
-from .molutils import convert_smiles_to_fp
+from utils import top_k_accuracy
+from plotutils import plot_loss, plot_topk, plot_nte
+from molutils import convert_smiles_to_fp
 import os
 import numpy as np
 import torch
@@ -337,7 +337,7 @@ class MHN(nn.Module):
                 # legacy from policyNN
                 loss = self.lossfunction(out, ys_batch[:, 2]).mean()  # WARNING: HEAD4 Reaction Template is ys[:,2]
         else:
-            loss = self.lossfunction(out, ys_batch).mean() 
+            loss = self.lossfunction(out, ys_batch.long()).mean() 
         return loss
 
     def forward_smiles(self, list_of_smiles, templates=None):
@@ -486,8 +486,8 @@ class MHN(nn.Module):
                 except:
                     running_loss += 0
 
-                rs = min(100,len(Xs)//bs) # reporting/logging steps
-                if step % rs == (rs-1):  # print every 2000 mini-batches
+                rs = max(min(100,len(Xs)//bs),0) # reporting/logging steps
+                if step % (rs+1) == (rs-1):  # print every 2000 mini-batches
                     if verbose: print('[%d, %5d] loss: %.3f' %
                           (epoch + 1, step + 1, running_loss / rs))
                     self.hist['step'].append(self.steps)

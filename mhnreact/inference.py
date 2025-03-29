@@ -9,5 +9,5 @@ File contains functions that help prepare and download USPTO-related datasets
 """
 
 # Cell
-from .model import ModelConfig, MHN
+from model import ModelConfig, MHN
 import torch

@@ -1,6 +1,6 @@
 from collections import defaultdict
-from mhnreact.molutils import canonicalize_template, canonicalize_smi, remove_attom_mapping
-from mhnreact.model import MHN
+from molutils import canonicalize_template, canonicalize_smi, remove_attom_mapping
+from model import MHN
 
 import os
 import pickle
@@ -30,8 +30,8 @@ import torch
 cachedir = 'data/cache/'
 memory = Memory(cachedir, verbose=0, bytes_limit=80e9)
 
-from mhnreact.molutils import getFingerprint
-from mhnreact.molutils import convert_smiles_to_fp
+from molutils import getFingerprint
+from molutils import convert_smiles_to_fp
 
 reaction_superclass_names = {
     1 : 'Heteroatom alkylation and arylation',
