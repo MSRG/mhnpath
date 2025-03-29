@@ -4,8 +4,11 @@
 [**Shivesh Prakash**](https://shivesh777.github.io/)<sup>1</sup> · [**Viki Kumar Prasad**](https://profiles.ucalgary.ca/viki-kumar-prasad)<sup>2,3,4</sup> · [**Hans-Arno Jacobsen**](https://www.eecg.toronto.edu/~jacobsen/)<sup>1,2</sup>
 
 <sup>1</sup>Department of Computer Science, University of Toronto
+
 <sup>2</sup>The Edward S. Rogers Sr. Department of Electrical & Computer Engineering, University of Toronto
+
 <sup>3</sup>Data Sciences Institute, University of Toronto
+
 <sup>4</sup>Current Affiliation: Department of Chemistry, University of Calgary
 
 </div>
@@ -23,7 +26,8 @@ We introduce MHNpath, a machine learning-driven retrosynthetic tool designed for
 
 ### Getting Started
 
-1. **Setup Environment**  
+1. **Setup Environment**
+
    Make the project directory your current working directory (this is important):
 
    ```bash
@@ -33,9 +37,11 @@ We introduce MHNpath, a machine learning-driven retrosynthetic tool designed for
    ```
 
 2. **Download Data and Models**
+
    Go to [Figshare Dataset](https://figshare.com/articles/dataset/Training_data_trained_models_and_other_required_files_for_A_User-Tunable_Machine_Learning_Framework_for_Step-Wise_Synthesis_Planning_/28673540), click on Download All, and save the zip file with the default name `28673540.zip`.
 
 3. **Extract and Organize Files**
+
    Run the following command to unzip and move the data/models to the required locations:
 
    ```bash
@@ -43,6 +49,7 @@ We introduce MHNpath, a machine learning-driven retrosynthetic tool designed for
    ```
 
 4. **Inference**
+
    To perform inference, run:
    ```bash
    python tree_search_global_greedy.py -product "compound" -n_enz 5 -n_syn 5 -max_depth 5 -json_pathway "tree.json" -device "cuda"
@@ -57,6 +64,7 @@ We introduce MHNpath, a machine learning-driven retrosynthetic tool designed for
    - `device` : Device to run the model on; either `"cpu"` or `"cuda"`. (Optional, default: `"cpu"`)
 
 5. Training
+
    To train using the same hyperparameters as in our experiments, run the following commands:
 
    ```bash
