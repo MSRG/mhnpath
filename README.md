@@ -1,16 +1,6 @@
 <div align="center">
 <h2>A User-Tunable Machine Learning Framework for Step-Wise Synthesis Planning</h2>
 
-[**Shivesh Prakash**](https://shivesh777.github.io/)<sup>1</sup> · [**Viki Kumar Prasad**](https://profiles.ucalgary.ca/viki-kumar-prasad)<sup>2,3,4</sup> · [**Hans-Arno Jacobsen**](https://www.eecg.toronto.edu/~jacobsen/)<sup>1,2</sup>
-
-<sup>1</sup>Department of Computer Science, University of Toronto
-
-<sup>2</sup>The Edward S. Rogers Sr. Department of Electrical & Computer Engineering, University of Toronto
-
-<sup>3</sup>Data Sciences Institute, University of Toronto
-
-<sup>4</sup>Current Affiliation: Department of Chemistry, University of Calgary
-
 </div>
 
 ---
