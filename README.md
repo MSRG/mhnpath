@@ -5,7 +5,7 @@
 
 ---
 
-This repository contains the official implementation of **A User-Tunable Machine Learning Framework for Step-Wise Synthesis Planning**, soon to be available on Arxiv.
+This repository contains the official implementation of **A User-Tunable Machine Learning Framework for Step-Wise Synthesis Planning**, available on [arXiv](https://arxiv.org/abs/2504.02191).
 
 ![1a](assets/1a.png)  
 ![1b](assets/1b.png)
@@ -14,7 +14,7 @@ We introduce MHNpath, a machine learning-driven retrosynthetic tool designed for
 
 ---
 
-### Getting Started
+## Getting Started
 
 1. **Setup Environment**
 
@@ -77,8 +77,26 @@ We introduce MHNpath, a machine learning-driven retrosynthetic tool designed for
    python mhnreact/train.py --concat_rand_template_thresh 3 --exp_name syn5_final --ssretroeval True --csv_path data/syn_mhn_split_5.csv --save_model True --seed 0 --epoch 11 --dropout 0.01 --lr 1e-4 --hopf_beta 0.035 --hopf_association_activation 'Tanh' --norm_input False --temp_encoder_layers 2 --batch_size 32 > syn5_final.txt
    ```
 
-### Credits
+## Credits
 
 This code base is built on top of, and thanks to them for maintaining the repositories:
 
 - [mhn-react](https://github.com/ml-jku/mhn-react)
+- [template-relevance](https://gitlab.com/mefortunato/template-relevance)
+- [Reaction_condition_recommendation](https://github.com/Coughy1991/Reaction_condition_recommendation)
+
+## Citation
+
+If you find MHNpath helpful, please consider citing:
+
+```bibtex
+@misc{prakash2025usertunablemachinelearningframework,
+      title={A User-Tunable Machine Learning Framework for Step-Wise Synthesis Planning}, 
+      author={Shivesh Prakash and Viki Kumar Prasad and Hans-Arno Jacobsen},
+      year={2025},
+      eprint={2504.02191},
+      archivePrefix={arXiv},
+      primaryClass={cs.CE},
+      url={https://arxiv.org/abs/2504.02191}, 
+}
+```
