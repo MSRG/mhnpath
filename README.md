@@ -92,7 +92,7 @@ If you find MHNpath helpful, please consider citing:
 ```bibtex
 @misc{prakash2025usertunablemachinelearningframework,
       title={A User-Tunable Machine Learning Framework for Step-Wise Synthesis Planning}, 
-      author={Shivesh Prakash and Viki Kumar Prasad and Hans-Arno Jacobsen},
+      author={Shivesh Prakash and Hans-Arno Jacobsen and Viki Kumar Prasad},
       year={2025},
       eprint={2504.02191},
       archivePrefix={arXiv},
