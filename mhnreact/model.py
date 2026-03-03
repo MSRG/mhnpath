@@ -9,9 +9,9 @@ Modified by: Shivesh Prakash (shivesh.prakash@mail.utoronto.ca)
 
 Model related functionality
 """
-from utils import top_k_accuracy
-from plotutils import plot_loss, plot_topk, plot_nte
-from molutils import convert_smiles_to_fp
+from mhnreact.utils import top_k_accuracy
+from mhnreact.plotutils import plot_loss, plot_topk, plot_nte
+from mhnreact.molutils import convert_smiles_to_fp
 import os
 import numpy as np
 import torch
