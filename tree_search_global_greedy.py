@@ -1,6 +1,8 @@
 import csv
 import json
 import heapq
+import itertools
+counter = itertools.count()
 from rdkit import Chem
 from predict import predict
 from rdkit.Chem import AllChem
@@ -139,12 +141,12 @@ def global_greedy_search(
     """
     pq = []
     heapq.heappush(
-        pq, (-float("inf"), start_node)
+        pq, (-float("inf"),next(counter), start_node)
     )  # Start node with arbitrarily high score
 
     while pq:
         print_tree_to_json(start_node, json_pathway)
-        _, node = heapq.heappop(pq)
+        _,_, node = heapq.heappop(pq)
 
         if node.cost_usd_per_g <= 100 or node.depth >= max_depth:
             return
@@ -180,16 +182,16 @@ def global_greedy_search(
             if start_node.smiles in new_smiles:
                 continue
 
-            new_edge = Edge(reaction_smiles, temperature, -1000, 1, rule, label, 0)
+            new_edge = Edge(reaction_smiles, temperature, -1000, 1, rule, label)
             for reactant in new_smiles:
                 cost_usd_per_g = get_price(reactant)
                 if cost_usd_per_g is None:
                     cost_usd_per_g = 50000
-                score = -(temperature / 300) - (cost_usd_per_g / 500) + solvent_score
+                score = -0*(temperature / 300) - 0.3*(cost_usd_per_g / 500) + 0*solvent_score
                 new_edge.score = max(score, new_edge.score)
                 new_node = Node(reactant, cost_usd_per_g, node.depth + 1)
                 node.subtrees.append((new_edge, new_node))
-                heapq.heappush(pq, (-score, new_node))
+                heapq.heappush(pq, (-score, next(counter), new_node))
 
         for i in range(len(syn_rules)):
             rule = syn_rules[i]
@@ -209,16 +211,16 @@ def global_greedy_search(
             if start_node.smiles in new_smiles:
                 continue
 
-            new_edge = Edge(reaction_smiles, temperature, -1000, 0, rule, 0, 0)
+            new_edge = Edge(reaction_smiles, temperature, -1000, 0, rule, 0)
             for reactant in new_smiles:
                 cost_usd_per_g = get_price(reactant)
                 if cost_usd_per_g is None:
                     cost_usd_per_g = 50000
-                score = -(temperature / 300) - (cost_usd_per_g / 500) + solvent_score
+                score = -0*(temperature / 300) - 0.3*(cost_usd_per_g / 500) + 0*solvent_score
                 new_edge.score = max(score, new_edge.score)
                 new_node = Node(reactant, cost_usd_per_g, node.depth + 1)
                 node.subtrees.append((new_edge, new_node))
-                heapq.heappush(pq, (-score, new_node))
+                heapq.heappush(pq, (-score, next(counter), new_node))
 
 
 def find_applicable_rules(
@@ -475,3 +477,4 @@ if __name__ == "__main__":
         json_pathway=args.json_pathway,
         device=args.device,
     )
+
