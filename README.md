@@ -27,11 +27,7 @@ We introduce MHNpath, a machine learning-driven retrosynthetic tool designed for
    ```
    To use the pricing feature, obtain your API keys from one or all of Mcule, Molport, and Chemspace, and add them to the `config.yaml` file. We highly recommend doing this for the best and most accurate results.
 
-2. **Download Data and Models**
-
-   Go to [Figshare Dataset](https://figshare.com/articles/dataset/Training_data_trained_models_and_other_required_files_for_A_User-Tunable_Machine_Learning_Framework_for_Step-Wise_Synthesis_Planning_/28673540), click on Download All, and save the zip file with the default name `28673540.zip`.
-
-3. **Extract and Organize Files**
+2. **Extract and Organize Files**
 
    Run the following command to unzip and move the data/models to the required locations:
 
@@ -39,7 +35,7 @@ We introduce MHNpath, a machine learning-driven retrosynthetic tool designed for
    python extract.py
    ```
 
-4. **Inference**
+3. **Inference**
 
    To perform inference, run:
    ```bash
@@ -54,7 +50,7 @@ We introduce MHNpath, a machine learning-driven retrosynthetic tool designed for
    - `json_pathway` : Filename for saving the resulting pathway tree in JSON format. (Optional, default: `"tree.json"`)
    - `device` : Device to run the model on; either `"cpu"` or `"cuda"`. (Optional, default: `"cpu"`)
 
-5. Training
+4. Training
 
    To train using the same hyperparameters as in our experiments, run the following commands:
 
