@@ -187,7 +187,7 @@ def global_greedy_search(
                 cost_usd_per_g = get_price(reactant)
                 if cost_usd_per_g is None:
                     cost_usd_per_g = 50000
-                score = -0*(temperature / 300) - 0.3*(cost_usd_per_g / 500) + 0*solvent_score
+                score = -(temperature / 300) - (cost_usd_per_g / 500) + solvent_score
                 new_edge.score = max(score, new_edge.score)
                 new_node = Node(reactant, cost_usd_per_g, node.depth + 1)
                 node.subtrees.append((new_edge, new_node))
@@ -216,7 +216,7 @@ def global_greedy_search(
                 cost_usd_per_g = get_price(reactant)
                 if cost_usd_per_g is None:
                     cost_usd_per_g = 50000
-                score = -0*(temperature / 300) - 0.3*(cost_usd_per_g / 500) + 0*solvent_score
+                score = -(temperature / 300) - (cost_usd_per_g / 500) + solvent_score
                 new_edge.score = max(score, new_edge.score)
                 new_node = Node(reactant, cost_usd_per_g, node.depth + 1)
                 node.subtrees.append((new_edge, new_node))
