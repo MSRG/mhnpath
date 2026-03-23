@@ -8,7 +8,7 @@ Contact: seidl@ml.jku.at
 File contains functions that
 """
 
-import model as model
+import mhnreact.model as model
 import torch
 import os
 

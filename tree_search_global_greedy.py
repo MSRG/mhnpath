@@ -1,6 +1,10 @@
 import csv
 import json
 import heapq
+import itertools
+import json
+import numpy as np
+counter = itertools.count()
 from rdkit import Chem
 from predict import predict
 from rdkit.Chem import AllChem
@@ -8,6 +12,15 @@ from mhnreact.inspector import *
 from price import calculate_cost
 from reaction_cond import pred_temperature, pred_solvent_score
 
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, np.integer):
+            return int(o)
+        if isinstance(o, np.floating):
+            return float(o)
+        if isinstance(o, np.ndarray):
+            return o.tolist()
+        return super().default(o)
 
 class Node:
     def __init__(self, smiles, cost_usd_per_g, depth):
@@ -139,12 +152,12 @@ def global_greedy_search(
     """
     pq = []
     heapq.heappush(
-        pq, (-float("inf"), start_node)
+        pq, (-float("inf"),next(counter), start_node)
     )  # Start node with arbitrarily high score
 
     while pq:
         print_tree_to_json(start_node, json_pathway)
-        _, node = heapq.heappop(pq)
+        _,_, node = heapq.heappop(pq)
 
         if node.cost_usd_per_g <= 100 or node.depth >= max_depth:
             return
@@ -160,6 +173,7 @@ def global_greedy_search(
             clf_syn4,
             clf_syn5,
         )
+        print("Ran the function for", node.smiles, "got no. of paths as", len(enz_rules + syn_rules))
         for i in range(len(enz_rules)):
             rule = enz_rules[i]
             label = enz_labels[i]
@@ -180,7 +194,7 @@ def global_greedy_search(
             if start_node.smiles in new_smiles:
                 continue
 
-            new_edge = Edge(reaction_smiles, temperature, -1000, 1, rule, label, 0)
+            new_edge = Edge(reaction_smiles, temperature, -1000, 1, rule, label)
             for reactant in new_smiles:
                 cost_usd_per_g = get_price(reactant)
                 if cost_usd_per_g is None:
@@ -189,7 +203,7 @@ def global_greedy_search(
                 new_edge.score = max(score, new_edge.score)
                 new_node = Node(reactant, cost_usd_per_g, node.depth + 1)
                 node.subtrees.append((new_edge, new_node))
-                heapq.heappush(pq, (-score, new_node))
+                heapq.heappush(pq, (-score, next(counter), new_node))
 
         for i in range(len(syn_rules)):
             rule = syn_rules[i]
@@ -209,7 +223,7 @@ def global_greedy_search(
             if start_node.smiles in new_smiles:
                 continue
 
-            new_edge = Edge(reaction_smiles, temperature, -1000, 0, rule, 0, 0)
+            new_edge = Edge(reaction_smiles, temperature, -1000, 0, rule, 0)
             for reactant in new_smiles:
                 cost_usd_per_g = get_price(reactant)
                 if cost_usd_per_g is None:
@@ -218,7 +232,7 @@ def global_greedy_search(
                 new_edge.score = max(score, new_edge.score)
                 new_node = Node(reactant, cost_usd_per_g, node.depth + 1)
                 node.subtrees.append((new_edge, new_node))
-                heapq.heappush(pq, (-score, new_node))
+                heapq.heappush(pq, (-score, next(counter), new_node))
 
 
 def find_applicable_rules(
@@ -396,7 +410,7 @@ def print_tree_to_json(node, filename="tree.json", level=0):
 
     if level == 0:
         with open(filename, "w") as file:
-            json.dump(tree_dict, file, indent=2)
+            json.dump(tree_dict, file, indent=2, cls=NumpyEncoder)
     else:
         return tree_dict
 
@@ -475,3 +489,4 @@ if __name__ == "__main__":
         json_pathway=args.json_pathway,
         device=args.device,
     )
+
