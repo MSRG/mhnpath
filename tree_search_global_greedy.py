@@ -2,6 +2,8 @@ import csv
 import json
 import heapq
 import itertools
+import json
+import numpy as np
 counter = itertools.count()
 from rdkit import Chem
 from predict import predict
@@ -10,6 +12,15 @@ from mhnreact.inspector import *
 from price import calculate_cost
 from reaction_cond import pred_temperature, pred_solvent_score
 
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, np.integer):
+            return int(o)
+        if isinstance(o, np.floating):
+            return float(o)
+        if isinstance(o, np.ndarray):
+            return o.tolist()
+        return super().default(o)
 
 class Node:
     def __init__(self, smiles, cost_usd_per_g, depth):
@@ -162,6 +173,7 @@ def global_greedy_search(
             clf_syn4,
             clf_syn5,
         )
+        print("Ran the function for", node.smiles, "got no. of paths as", len(enz_rules + syn_rules))
         for i in range(len(enz_rules)):
             rule = enz_rules[i]
             label = enz_labels[i]
@@ -398,7 +410,7 @@ def print_tree_to_json(node, filename="tree.json", level=0):
 
     if level == 0:
         with open(filename, "w") as file:
-            json.dump(tree_dict, file, indent=2)
+            json.dump(tree_dict, file, indent=2, cls=NumpyEncoder)
     else:
         return tree_dict
 
